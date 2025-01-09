@@ -3,41 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaksi</title>
+    <title>Manajemen Transaksi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Dashboard Kasir</a>
+            <a class="navbar-brand" href="#">Dashboard</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="transaksi.html">Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan.html">Laporan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="login.html">Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="home.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="produk.html"><i class="fas fa-cubes"></i> Produk</a></li>
+                    <li class="nav-item"><a class="nav-link" href="user.html"><i class="fas fa-user"></i> User</a></li>
+                    <li class="nav-item"><a class="nav-link" href="kategori.html"><i class="fas fa-list"></i> Kategori</a></li>
+                    <li class="nav-item"><a class="nav-link" href="suplayer.html"><i class="fas fa-truck"></i> Suplayer</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="transaksi.html"><i class="fas fa-exchange-alt"></i> Transaksi</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
     <div class="container mt-5">
-        <h1>Selamat datang, Kasir!</h1>
-        <p>Anda dapat mengelola transaksi di sini.</p>
+        <h1 class="text-center">Manajemen Transaksi</h1>
+
+        <!-- Form Transaksi -->
+        <form id="transaksiForm" class="mt-4">
+            <div class="mb-3">
+                <label for="transaksiId" class="form-label">ID Transaksi</label>
+                <input type="text" class="form-control" id="transaksiId" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="produk" class="form-label">Produk</label>
+                <select class="form-control" id="produk" required>
+                    <option value="">Pilih Produk</option>
+                    <!-- Produk options akan diisi dengan data dari localStorage -->
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="jumlah" class="form-label">Jumlah</label>
+                <input type="number" class="form-control" id="jumlah" placeholder="Masukkan Jumlah" required>
+            </div>
+            <div class="mb-3">
+                <label for="totalHarga" class="form-label">Total Harga</label>
+                <input type="number" class="form-control" id="totalHarga" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-control" id="status" required>
+                    <option value="">Pilih Status</option>
+                    <option value="Lunas">Lunas</option>
+                    <option value="Belum Lunas">Belum Lunas</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="submitButton">Tambah Transaksi</button>
+        </form>
+
+        <!-- Tabel Data Transaksi -->
+        <div class="mt-5">
+            <h2>Daftar Transaksi</h2>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Produk</th>
+                        <th>Jumlah</th>
+                        <th>Total Harga</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="transaksiTable"></tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        // Cek apakah user sudah login
-        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        let transaksi = JSON.parse(localStorage.getItem('transaksi')) || [];
+        let produk = JSON.parse(localStorage.getItem('produk')) || [];
+        let editIndex = null; // Indeks data yang sedang diedit
 
-        if (!loggedInUser || loggedInUser.role !== 'Kasir') {
-            // Jika user tidak login atau bukan Kasir, redirect ke halaman login
-            alert('Akses terbatas! Anda harus login sebagai Kasir.');
-            window.location.href = 'login.html';
+        // Fungsi menyimpan ke localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('transaksi', JSON.stringify(transaksi));
         }
+
+        // Fungsi menampilkan tabel transaksi
+        function renderTable() {
+            const tableBody = document.getElementById('transaksiTable');
+            tableBody.innerHTML = '';
+            transaksi.forEach((data, index) => {
+                const row = `<tr>
+                    <td>${data.id}</td>
+                    <td>${data.produk}</td>
+                    <td>${data.jumlah}</td>
+                    <td>${data.totalHarga}</td>
+                    <td>${data.status}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editTransaksi(${index})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTransaksi(${index})">Hapus</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Fungsi membuat ID unik
+        function generateUniqueId() {
+            let id = 'TRX-' + Math.floor(Math.random() * 10000);
+            while (transaksi.some(data => data.id === id)) {
+                id = 'TRX-' + Math.floor(Math.random() * 10000);
+            }
+            return id;
+        }
+
+        // Fungsi mengatur ID unik saat dimuat
+        function setUniqueId() {
+            document.getElementById('transaksiId').value = generateUniqueId();
+        }
+
+        // Fungsi mengisi dropdown produk
+        function populateSelectOptions() {
+            const produkSelect = document.getElementById('produk');
+            produkSelect.innerHTML = '<option value="">Pilih Produk</option>';
+            produk.forEach(p => {
+                produkSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            });
+        }
+
+        // Hitung total harga berdasarkan produk dan jumlah
+        function calculateTotalHarga() {
+            const produkId = document.getElementById('produk').value;
+            const jumlah = document.getElementById('jumlah').value;
+            if (produkId && jumlah) {
+                const selectedProduk = produk.find(p => p.id === produkId);
+                const totalHarga = selectedProduk ? selectedProduk.harga * jumlah : 0;
+                document.getElementById('totalHarga').value = totalHarga;
+            } else {
+                document.getElementById('totalHarga').value = 0;
+            }
+        }
+
+        // Tambah atau update transaksi
+        document.getElementById('transaksiForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const produkId = document.getElementById('produk').value;
+            const jumlah = parseInt(document.getElementById('jumlah').value, 10);
+            const totalHarga = parseFloat(document.getElementById('totalHarga').value);
+            const status = document.getElementById('status').value;
+
+            // Validasi input
+            if (!produkId || !jumlah || !status) {
+                alert("Semua field harus diisi.");
+                return;
+            }
+
+            const transaksiData = {
+                id: document.getElementById('transaksiId').value,
+                produk: produk.find(p => p.id === produkId).name,
+                jumlah,
+                totalHarga,
+                status
+            };
+
+            if (editIndex === null) {
+                // Tambah data baru
+                transaksi.push(transaksiData);
+            } else {
+                // Update data yang sudah ada
+                transaksi[editIndex] = transaksiData;
+                editIndex = null;
+                document.getElementById('submitButton').textContent = 'Tambah Transaksi';
+            }
+
+            saveToLocalStorage();
+            renderTable();
+            this.reset();
+            setUniqueId();
+        });
+
+        // Edit transaksi
+        function editTransaksi(index) {
+            const data = transaksi[index];
+            editIndex = index;
+            document.getElementById('transaksiId').value = data.id;
+            document.getElementById('produk').value = produk.find(p => p.name === data.produk).id;
+            document.getElementById('jumlah').value = data.jumlah;
+            document.getElementById('totalHarga').value = data.totalHarga;
+            document.getElementById('status').value = data.status;
+            document.getElementById('submitButton').textContent = 'Update Transaksi';
+        }
+
+        // Hapus transaksi
+        function deleteTransaksi(index) {
+            if (confirm('Yakin ingin menghapus transaksi ini?')) {
+                transaksi.splice(index, 1);
+                saveToLocalStorage();
+                renderTable();
+            }
+        }
+
+        // Atur ID unik dan dropdown produk saat halaman dimuat
+        window.onload = () => {
+            setUniqueId();
+            populateSelectOptions();
+            renderTable();
+        };
+
+        // Hitung total harga saat jumlah atau produk berubah
+        document.getElementById('produk').addEventListener('change', calculateTotalHarga);
+        document.getElementById('jumlah').addEventListener('input', calculateTotalHarga);
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
