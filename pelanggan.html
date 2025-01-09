@@ -19,14 +19,6 @@
                     <li class="nav-item"><a class="nav-link" href="home.html"><i class="fas fa-home"></i> Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="user.html"><i class="fas fa-user"></i> User</a></li>
                     <li class="nav-item"><a class="nav-link active" href="pelanggan.html"><i class="fas fa-users"></i> Pelanggan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="produk.html"><i class="fas fa-box"></i> Produk</a></li>
-                    <li class="nav-item"><a class="nav-link" href="kategori.html"><i class="fas fa-list"></i> Kategori</a></li>
-                    <li class="nav-item"><a class="nav-link" href="item.html"><i class="fas fa-tags"></i> Item</a></li>
-                    <li class="nav-item"><a class="nav-link" href="suplayer.html"><i class="fas fa-truck"></i> Suplayer</a></li>
-                    <li class="nav-item"><a class="nav-link" href="transaksi.html"><i class="fas fa-shopping-cart"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembayaran.html"><i class="fas fa-credit-card"></i> Pembayaran</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
                 </ul>
             </div>
         </div>
@@ -65,7 +57,7 @@
                 <input type="text" class="form-control" id="pelangganAddress" placeholder="Masukkan Alamat" required>
                 <div class="invalid-feedback">Alamat tidak boleh kosong.</div>
             </div>
-            <button type="submit" class="btn btn-primary">Tambah Pelanggan</button>
+            <button type="submit" class="btn btn-primary" id="submitButton">Tambah Pelanggan</button>
         </form>
 
         <!-- Tabel Data Pelanggan -->
@@ -90,6 +82,7 @@
 
     <script>
         let pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
+        let editIndex = null; // Indeks data yang sedang diedit
 
         // Fungsi menyimpan ke localStorage
         function saveToLocalStorage() {
@@ -137,7 +130,7 @@
             return form.checkValidity();
         }
 
-        // Tambah pelanggan
+        // Tambah atau update pelanggan
         document.getElementById('pelangganForm').addEventListener('submit', function (e) {
             e.preventDefault();
             if (!validateForm()) {
@@ -155,7 +148,16 @@
                 address: document.getElementById('pelangganAddress').value,
             };
 
-            pelanggan.push(pelangganData);
+            if (editIndex === null) {
+                // Tambah data baru
+                pelanggan.push(pelangganData);
+            } else {
+                // Update data yang sudah ada
+                pelanggan[editIndex] = pelangganData;
+                editIndex = null;
+                document.getElementById('submitButton').textContent = 'Tambah Pelanggan';
+            }
+
             saveToLocalStorage();
             renderTable();
             this.reset();
@@ -166,6 +168,7 @@
         // Edit pelanggan
         function editPelanggan(index) {
             const data = pelanggan[index];
+            editIndex = index;
             document.getElementById('pelangganId').value = data.id;
             document.getElementById('pelangganName').value = data.name;
             document.getElementById('pelangganDob').value = data.dob;
@@ -173,9 +176,7 @@
             document.getElementById('pelangganEmail').value = data.email;
             document.getElementById('pelangganAddress').value = data.address;
 
-            pelanggan.splice(index, 1);
-            saveToLocalStorage();
-            renderTable();
+            document.getElementById('submitButton').textContent = 'Update Pelanggan';
         }
 
         // Hapus pelanggan
