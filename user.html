@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User</title>
+    <title>Manajemen User</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -18,15 +18,171 @@
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="home.html"><i class="fas fa-home"></i> Home</a></li>
                     <li class="nav-item"><a class="nav-link active" href="user.html"><i class="fas fa-user"></i> User</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pelanggan.html"><i class="fas fa-users"></i> Pelanggan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="produk.html"><i class="fas fa-box"></i> Produk</a></li>
+                    <li class="nav-item"><a class="nav-link" href="kategori.html"><i class="fas fa-list"></i> Kategori</a></li>
+                    <li class="nav-item"><a class="nav-link" href="item.html"><i class="fas fa-tags"></i> Item</a></li>
+                    <li class="nav-item"><a class="nav-link" href="suplayer.html"><i class="fas fa-truck"></i> Suplayer</a></li>
+                    <li class="nav-item"><a class="nav-link" href="transaksi.html"><i class="fas fa-shopping-cart"></i> Transaksi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pembayaran.html"><i class="fas fa-credit-card"></i> Pembayaran</a></li>
+                    <li class="nav-item"><a class="nav-link" href="laporan.html"><i class="fas fa-chart-bar"></i> Laporan</a></li>
                     <li class="nav-item"><a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
                 </ul>
             </div>
         </div>
     </nav>
     <div class="container mt-5">
-        <h1 class="text-center">Halaman User</h1>
-        <p class="text-center">Ini adalah halaman User.</p>
+        <h1 class="text-center">Manajemen User</h1>
+
+        <!-- Form User -->
+        <form id="userForm" class="mt-4">
+            <div class="mb-3">
+                <label for="userId" class="form-label">ID User</label>
+                <input type="text" class="form-control" id="userId" placeholder="Masukkan ID User" required>
+            </div>
+            <div class="mb-3">
+                <label for="userName" class="form-label">Nama</label>
+                <input type="text" class="form-control" id="userName" placeholder="Masukkan Nama" required>
+            </div>
+            <div class="mb-3">
+                <label for="userGender" class="form-label">Jenis Kelamin</label>
+                <select class="form-select" id="userGender" required>
+                    <option value="">Pilih Jenis Kelamin</option>
+                    <option value="Laki-Laki">Laki-Laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="userPhone" class="form-label">No Handphone</label>
+                <input type="text" class="form-control" id="userPhone" placeholder="Masukkan No Handphone" required>
+            </div>
+            <div class="mb-3">
+                <label for="userAddress" class="form-label">Alamat</label>
+                <input type="text" class="form-control" id="userAddress" placeholder="Masukkan Alamat" required>
+            </div>
+            <div class="mb-3">
+                <label for="userEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="userEmail" placeholder="Masukkan Email" required>
+            </div>
+            <div class="mb-3">
+                <label for="userPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" id="userPassword" placeholder="Masukkan Password" required>
+            </div>
+            <div class="mb-3">
+                <label for="userRole" class="form-label">Peran</label>
+                <select class="form-select" id="userRole" required>
+                    <option value="">Pilih Peran</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Pengguna">Pengguna</option>
+                    <option value="Kasir">Kasir</option>
+                    <option value="Operator">Operator</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Tambah User</button>
+        </form>
+
+        <!-- Tabel Data User -->
+        <div class="mt-5">
+            <h2>Daftar User</h2>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nama</th>
+                        <th>Jenis Kelamin</th>
+                        <th>No Handphone</th>
+                        <th>Alamat</th>
+                        <th>Email</th>
+                        <th>Peran</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="userTable"></tbody>
+            </table>
+        </div>
     </div>
+
+    <script>
+        // Inisialisasi localStorage
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+
+        // Fungsi untuk menyimpan data ke localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        // Fungsi untuk menampilkan data ke tabel
+        function renderTable() {
+            const tableBody = document.getElementById('userTable');
+            tableBody.innerHTML = '';
+            users.forEach((user, index) => {
+                const row = `<tr>
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.gender}</td>
+                    <td>${user.phone}</td>
+                    <td>${user.address}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editUser(${index})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser(${index})">Hapus</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Fungsi untuk menambahkan user
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = {
+                id: document.getElementById('userId').value,
+                name: document.getElementById('userName').value,
+                gender: document.getElementById('userGender').value,
+                phone: document.getElementById('userPhone').value,
+                address: document.getElementById('userAddress').value,
+                email: document.getElementById('userEmail').value,
+                password: document.getElementById('userPassword').value,
+                role: document.getElementById('userRole').value
+            };
+            users.push(user);
+            saveToLocalStorage();
+            renderTable();
+            this.reset();
+        });
+
+        // Fungsi untuk mengedit user
+        function editUser(index) {
+            const user = users[index];
+            document.getElementById('userId').value = user.id;
+            document.getElementById('userName').value = user.name;
+            document.getElementById('userGender').value = user.gender;
+            document.getElementById('userPhone').value = user.phone;
+            document.getElementById('userAddress').value = user.address;
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userPassword').value = user.password;
+            document.getElementById('userRole').value = user.role;
+
+            // Hapus data lama dan simpan ulang setelah edit
+            users.splice(index, 1);
+            saveToLocalStorage();
+            renderTable();
+        }
+
+        // Fungsi untuk menghapus user
+        function deleteUser(index) {
+            if (confirm('Yakin ingin menghapus user ini?')) {
+                users.splice(index, 1);
+                saveToLocalStorage();
+                renderTable();
+            }
+        }
+
+        // Render tabel saat halaman dimuat
+        renderTable();
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
