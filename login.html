@@ -23,32 +23,25 @@
     </div>
 
     <script>
-        // Data pengguna yang tersimpan di localStorage
         const users = JSON.parse(localStorage.getItem('users')) || [];
 
-        // Fungsi untuk login
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
-            // Validasi apakah user dengan email dan password yang sesuai ada
             const user = users.find(user => user.email === email && user.password === password);
 
             if (user) {
-                // Menyimpan user yang login ke localStorage untuk sesi ini
                 localStorage.setItem('loggedInUser', JSON.stringify(user));
 
-                // Redirect berdasarkan peran user
                 if (user.role === 'Admin') {
-                    window.location.href = 'home.html'; // Admin bisa mengakses dashboard utama
-                } else if (user.role === 'admin') {
-                    window.location.href = 'user.html'; // Pengguna diarahkan ke halaman user
+                    window.location.href = 'home.html';
                 } else if (user.role === 'Kasir') {
-                    window.location.href = 'transaksi.html'; // Kasir diarahkan ke halaman transaksi
-                } else if (user.role === 'Operator') {
-                    window.location.href = 'laporan.html'; // Operator diarahkan ke halaman laporan
+                    window.location.href = 'transaksi.html';
+                } else if (user.role === 'Pengguna') {
+                    window.location.href = 'user.html';
                 }
             } else {
                 alert('Email atau Password salah!');
