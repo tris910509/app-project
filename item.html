@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Item</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="home.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="user.html"><i class="fas fa-user"></i> User</a></li>
+                    <li class="nav-item"><a class="nav-link" href="kategori.html"><i class="fas fa-list"></i> Kategori</a></li>
+                    <li class="nav-item"><a class="nav-link" href="suplayer.html"><i class="fas fa-truck"></i> Suplayer</a></li>
+                    <li class="nav-item"><a class="nav-link" href="produk.html"><i class="fas fa-cubes"></i> Produk</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="item.html"><i class="fas fa-box"></i> Item</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h1 class="text-center">Manajemen Item</h1>
+
+        <!-- Form Item -->
+        <form id="itemForm" class="mt-4">
+            <div class="mb-3">
+                <label for="itemId" class="form-label">ID Item</label>
+                <input type="text" class="form-control" id="itemId" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="itemNama" class="form-label">Nama Item</label>
+                <input type="text" class="form-control" id="itemNama" placeholder="Masukkan Nama Item" required>
+                <div class="invalid-feedback">Nama item tidak boleh kosong.</div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="submitButton">Tambah Item</button>
+        </form>
+
+        <!-- Tabel Item -->
+        <div class="mt-5">
+            <h2>Daftar Item</h2>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nama Item</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="itemTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let item = JSON.parse(localStorage.getItem('item')) || [];
+        let editIndex = null;
+
+        // Fungsi untuk menyimpan item ke localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('item', JSON.stringify(item));
+        }
+
+        // Fungsi untuk menampilkan tabel item
+        function renderTable() {
+            const tableBody = document.getElementById('itemTable');
+            tableBody.innerHTML = '';
+            item.forEach((data, index) => {
+                const row = `<tr>
+                    <td>${data.id}</td>
+                    <td>${data.name}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editItem(${index})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteItem(${index})">Hapus</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Fungsi untuk membuat ID unik untuk item
+        function generateUniqueId() {
+            let id = 'ITEM-' + Math.floor(Math.random() * 10000);
+            while (item.some(i => i.id === id)) {
+                id = 'ITEM-' + Math.floor(Math.random() * 10000);
+            }
+            return id;
+        }
+
+        // Fungsi mengatur ID unik saat halaman dimuat
+        function setUniqueId() {
+            document.getElementById('itemId').value = generateUniqueId();
+        }
+
+        // Fungsi untuk validasi form
+        function validateForm() {
+            const form = document.getElementById('itemForm');
+            return form.checkValidity();
+        }
+
+        // Fungsi untuk menambah atau memperbarui item
+        document.getElementById('itemForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!validateForm()) {
+                e.stopPropagation();
+                this.classList.add('was-validated');
+                return;
+            }
+
+            const itemData = {
+                id: document.getElementById('itemId').value,
+                name: document.getElementById('itemNama').value
+            };
+
+            if (editIndex === null) {
+                // Tambah data baru
+                item.push(itemData);
+            } else {
+                // Update data yang sudah ada
+                item[editIndex] = itemData;
+                editIndex = null;
+                document.getElementById('submitButton').textContent = 'Tambah Item';
+            }
+
+            saveToLocalStorage();
+            renderTable();
+            this.reset();
+            setUniqueId();
+            this.classList.remove('was-validated');
+        });
+
+        // Fungsi untuk mengedit item
+        function editItem(index) {
+            const data = item[index];
+            editIndex = index;
+            document.getElementById('itemId').value = data.id;
+            document.getElementById('itemNama').value = data.name;
+
+            document.getElementById('submitButton').textContent = 'Update Item';
+        }
+
+        // Fungsi untuk menghapus item
+        function deleteItem(index) {
+            if (confirm('Yakin ingin menghapus item ini?')) {
+                item.splice(index, 1);
+                saveToLocalStorage();
+                renderTable();
+            }
+        }
+
+        // Atur ID unik dan muat data saat halaman dimuat
+        window.onload = () => {
+            setUniqueId();
+            renderTable();
+        };
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
