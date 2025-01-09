@@ -37,10 +37,6 @@
         <!-- Form User -->
         <form id="userForm" class="mt-4">
             <div class="mb-3">
-                <label for="userId" class="form-label">ID User</label>
-                <input type="text" class="form-control" id="userId" placeholder="Masukkan ID User" required>
-            </div>
-            <div class="mb-3">
                 <label for="userName" class="form-label">Nama</label>
                 <input type="text" class="form-control" id="userName" placeholder="Masukkan Nama" required>
             </div>
@@ -105,10 +101,12 @@
     <script>
         // Inisialisasi localStorage
         let users = JSON.parse(localStorage.getItem('users')) || [];
+        let userIdCounter = localStorage.getItem('userIdCounter') ? parseInt(localStorage.getItem('userIdCounter')) : 0;
 
         // Fungsi untuk menyimpan data ke localStorage
         function saveToLocalStorage() {
             localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('userIdCounter', userIdCounter);
         }
 
         // Fungsi untuk menampilkan data ke tabel
@@ -136,8 +134,10 @@
         // Fungsi untuk menambahkan user
         document.getElementById('userForm').addEventListener('submit', function(e) {
             e.preventDefault();
+
+            // Menambahkan ID otomatis
             const user = {
-                id: document.getElementById('userId').value,
+                id: ++userIdCounter, // ID otomatis increment
                 name: document.getElementById('userName').value,
                 gender: document.getElementById('userGender').value,
                 phone: document.getElementById('userPhone').value,
@@ -146,6 +146,7 @@
                 password: document.getElementById('userPassword').value,
                 role: document.getElementById('userRole').value
             };
+
             users.push(user);
             saveToLocalStorage();
             renderTable();
@@ -155,7 +156,6 @@
         // Fungsi untuk mengedit user
         function editUser(index) {
             const user = users[index];
-            document.getElementById('userId').value = user.id;
             document.getElementById('userName').value = user.name;
             document.getElementById('userGender').value = user.gender;
             document.getElementById('userPhone').value = user.phone;
