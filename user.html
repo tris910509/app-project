@@ -3,41 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User</title>
+    <title>User Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Dashboard Pengguna</a>
+            <a class="navbar-brand" href="#">User Management</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="user.html">User</a></li>
-                    <li class="nav-item"><a class="nav-link" href="transaksi.html">Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan.html">Laporan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="login.html">Logout</a></li>
+                <ul class="navbar-nav" id="navbarLinks">
+                    <!-- Links will be dynamically generated based on user role -->
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <h1>Selamat datang, Pengguna!</h1>
-        <p>Anda memiliki akses terbatas. Anda dapat melihat dan mengelola data pengguna.</p>
+    <div class="container mt-5" id="userContent">
+        <!-- User Table and Action Buttons will be displayed here -->
     </div>
 
     <script>
-        // Cek apakah user sudah login
+        // Mengambil data user yang login dan data user lainnya dari localStorage
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        const users = JSON.parse(localStorage.getItem('users')) || [];
 
-        if (!loggedInUser || loggedInUser.role !== 'Pengguna') {
-            // Jika user tidak login atau bukan Pengguna, redirect ke halaman login
-            alert('Akses terbatas! Anda harus login sebagai Pengguna.');
+        // Validasi jika user belum login
+        if (!loggedInUser) {
+            alert('Silakan login terlebih dahulu!');
             window.location.href = 'login.html';
+        }
+
+        // Menampilkan navigasi dan konten sesuai dengan peran
+        const navbarLinks = document.getElementById('navbarLinks');
+        const userContent = document.getElementById('userContent');
+        let linksHtml = '';
+
+        if (loggedInUser.role === 'Admin') {
+            linksHtml = `
+                <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="login.html">Logout</a></li>
+            `;
+            displayUsers(true);  // Admin dapat melihat, mengedit, dan menghapus
+        } else if (loggedInUser.role === 'Kasir' || loggedInUser.role === 'Operator') {
+            linksHtml = `
+                <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="login.html">Logout</a></li>
+            `;
+            displayUsers(false);  // Kasir/Operator hanya dapat melihat
+        }
+
+        navbarLinks.innerHTML = linksHtml;
+
+        // Fungsi untuk menampilkan daftar user
+        function displayUsers(isAdmin) {
+            let userTableHtml = `
+                <h2>Daftar Pengguna</h2>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            users.forEach(user => {
+                // Tampilkan tabel user
+                userTableHtml += `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td>
+                            ${isAdmin ? `
+                                <button class="btn btn-warning btn-sm" onclick="editUser(${user.id})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Hapus</button>
+                            ` : `
+                                <button class="btn btn-info btn-sm" disabled>Lihat</button>
+                            `}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            userTableHtml += `
+                    </tbody>
+                </table>
+            `;
+
+            userContent.innerHTML = userTableHtml;
+        }
+
+        // Fungsi untuk mengedit user
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            const newName = prompt('Edit nama pengguna:', user.name);
+            const newEmail = prompt('Edit email pengguna:', user.email);
+
+            if (newName && newEmail) {
+                user.name = newName;
+                user.email = newEmail;
+                localStorage.setItem('users', JSON.stringify(users));
+                displayUsers(true);  // Re-render daftar user
+            }
+        }
+
+        // Fungsi untuk menghapus user
+        function deleteUser(userId) {
+            const confirmed = confirm('Apakah Anda yakin ingin menghapus user ini?');
+            if (confirmed) {
+                const updatedUsers = users.filter(user => user.id !== userId);
+                localStorage.setItem('users', JSON.stringify(updatedUsers));
+                displayUsers(true);  // Re-render daftar user
+            }
         }
     </script>
 
