@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suplayer</title>
+    <title>Manajemen Suplayer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -19,19 +19,184 @@
                     <li class="nav-item"><a class="nav-link" href="home.html"><i class="fas fa-home"></i> Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="user.html"><i class="fas fa-user"></i> User</a></li>
                     <li class="nav-item"><a class="nav-link" href="pelanggan.html"><i class="fas fa-users"></i> Pelanggan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="produk.html"><i class="fas fa-box"></i> Produk</a></li>
                     <li class="nav-item"><a class="nav-link" href="kategori.html"><i class="fas fa-list"></i> Kategori</a></li>
-                    <li class="nav-item"><a class="nav-link" href="item.html"><i class="fas fa-tags"></i> Item</a></li>
                     <li class="nav-item"><a class="nav-link active" href="suplayer.html"><i class="fas fa-truck"></i> Suplayer</a></li>
-                    <li class="nav-item"><a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
                 </ul>
             </div>
         </div>
     </nav>
     <div class="container mt-5">
-        <h1 class="text-center">Halaman Suplayer</h1>
-        <p class="text-center">Daftar suplayer akan ditampilkan di sini.</p>
+        <h1 class="text-center">Manajemen Suplayer</h1>
+
+        <!-- Form Suplayer -->
+        <form id="suplayerForm" class="mt-4">
+            <div class="mb-3">
+                <label for="suplayerId" class="form-label">ID Suplayer</label>
+                <input type="text" class="form-control" id="suplayerId" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="suplayerName" class="form-label">Nama Suplayer</label>
+                <input type="text" class="form-control" id="suplayerName" placeholder="Masukkan Nama Suplayer" required>
+                <div class="invalid-feedback">Nama suplayer tidak boleh kosong.</div>
+            </div>
+            <div class="mb-3">
+                <label for="companyName" class="form-label">Nama Perusahaan</label>
+                <input type="text" class="form-control" id="companyName" placeholder="Masukkan Nama Perusahaan" required>
+                <div class="invalid-feedback">Nama perusahaan tidak boleh kosong.</div>
+            </div>
+            <div class="mb-3">
+                <label for="suplayerPhone" class="form-label">No Handphone</label>
+                <input type="text" class="form-control" id="suplayerPhone" placeholder="Masukkan No Handphone" required pattern="\d{10,13}">
+                <div class="invalid-feedback">Masukkan no handphone yang valid (10-13 digit).</div>
+            </div>
+            <div class="mb-3">
+                <label for="suplayerEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="suplayerEmail" placeholder="Masukkan Email" required>
+                <div class="invalid-feedback">Masukkan email yang valid.</div>
+            </div>
+            <div class="mb-3">
+                <label for="suplayerAddress" class="form-label">Alamat</label>
+                <input type="text" class="form-control" id="suplayerAddress" placeholder="Masukkan Alamat" required>
+                <div class="invalid-feedback">Alamat tidak boleh kosong.</div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="submitButton">Tambah Suplayer</button>
+        </form>
+
+        <!-- Tabel Data Suplayer -->
+        <div class="mt-5">
+            <h2>Daftar Suplayer</h2>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nama Suplayer</th>
+                        <th>Nama Perusahaan</th>
+                        <th>No Handphone</th>
+                        <th>Email</th>
+                        <th>Alamat</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="suplayerTable"></tbody>
+            </table>
+        </div>
     </div>
+
+    <script>
+        let suplayer = JSON.parse(localStorage.getItem('suplayer')) || [];
+        let editIndex = null; // Indeks data yang sedang diedit
+
+        // Fungsi menyimpan ke localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('suplayer', JSON.stringify(suplayer));
+        }
+
+        // Fungsi menampilkan tabel
+        function renderTable() {
+            const tableBody = document.getElementById('suplayerTable');
+            tableBody.innerHTML = '';
+            suplayer.forEach((data, index) => {
+                const row = `<tr>
+                    <td>${data.id}</td>
+                    <td>${data.name}</td>
+                    <td>${data.company}</td>
+                    <td>${data.phone}</td>
+                    <td>${data.email}</td>
+                    <td>${data.address}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editSuplayer(${index})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSuplayer(${index})">Hapus</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Fungsi membuat ID unik
+        function generateUniqueId() {
+            let id = 'SUP-' + Math.floor(Math.random() * 10000);
+            while (suplayer.some(data => data.id === id)) {
+                id = 'SUP-' + Math.floor(Math.random() * 10000);
+            }
+            return id;
+        }
+
+        // Fungsi mengatur ID unik saat dimuat
+        function setUniqueId() {
+            document.getElementById('suplayerId').value = generateUniqueId();
+        }
+
+        // Validasi form
+        function validateForm() {
+            const form = document.getElementById('suplayerForm');
+            return form.checkValidity();
+        }
+
+        // Tambah atau update suplayer
+        document.getElementById('suplayerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!validateForm()) {
+                e.stopPropagation();
+                this.classList.add('was-validated');
+                return;
+            }
+
+            const suplayerData = {
+                id: document.getElementById('suplayerId').value,
+                name: document.getElementById('suplayerName').value,
+                company: document.getElementById('companyName').value,
+                phone: document.getElementById('suplayerPhone').value,
+                email: document.getElementById('suplayerEmail').value,
+                address: document.getElementById('suplayerAddress').value,
+            };
+
+            if (editIndex === null) {
+                // Tambah data baru
+                suplayer.push(suplayerData);
+            } else {
+                // Update data yang sudah ada
+                suplayer[editIndex] = suplayerData;
+                editIndex = null;
+                document.getElementById('submitButton').textContent = 'Tambah Suplayer';
+            }
+
+            saveToLocalStorage();
+            renderTable();
+            this.reset();
+            setUniqueId();
+            this.classList.remove('was-validated');
+        });
+
+        // Edit suplayer
+        function editSuplayer(index) {
+            const data = suplayer[index];
+            editIndex = index;
+            document.getElementById('suplayerId').value = data.id;
+            document.getElementById('suplayerName').value = data.name;
+            document.getElementById('companyName').value = data.company;
+            document.getElementById('suplayerPhone').value = data.phone;
+            document.getElementById('suplayerEmail').value = data.email;
+            document.getElementById('suplayerAddress').value = data.address;
+
+            document.getElementById('submitButton').textContent = 'Update Suplayer';
+        }
+
+        // Hapus suplayer
+        function deleteSuplayer(index) {
+            if (confirm('Yakin ingin menghapus suplayer ini?')) {
+                suplayer.splice(index, 1);
+                saveToLocalStorage();
+                renderTable();
+            }
+        }
+
+        // Atur ID unik saat halaman dimuat
+        window.onload = () => {
+            setUniqueId();
+            renderTable();
+        };
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
