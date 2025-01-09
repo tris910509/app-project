@@ -43,7 +43,7 @@
                 // Redirect berdasarkan peran user
                 if (user.role === 'Admin') {
                     window.location.href = 'home.html'; // Admin bisa mengakses dashboard utama
-                } else if (user.role === 'Pengguna') {
+                } else if (user.role === 'admin') {
                     window.location.href = 'user.html'; // Pengguna diarahkan ke halaman user
                 } else if (user.role === 'Kasir') {
                     window.location.href = 'transaksi.html'; // Kasir diarahkan ke halaman transaksi
