@@ -185,28 +185,10 @@
             document.getElementById('submitButton').textContent = 'Simpan';
         }
 
-        // Hak akses berdasarkan peran
-        function checkAccess() {
-            const role = localStorage.getItem('role'); // Mendapatkan role dari localStorage
-
-            if (role === 'admin') {
-                // Admin dapat akses penuh
-                document.getElementById('userFormContainer').style.display = 'block';
-                document.getElementById('userList').style.display = 'block';
-            } else if (role === 'kasir' || role === 'operator') {
-                // Kasir dan operator hanya dapat melihat user
-                document.getElementById('userFormContainer').style.display = 'none';
-                document.getElementById('userList').style.display = 'block';
-            } else {
-                // Pengguna lain tidak bisa akses halaman ini
-                document.body.innerHTML = '<h1>Anda tidak memiliki akses</h1>';
-            }
-        }
-
-        // Inisialisasi
         document.getElementById('userForm').addEventListener('submit', handleFormSubmit);
+
+        // Menampilkan data user saat halaman dimuat
         displayUsers();
-        checkAccess();
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
