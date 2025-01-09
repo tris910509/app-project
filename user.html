@@ -115,7 +115,7 @@
                 user.name = newName;
                 user.email = newEmail;
                 localStorage.setItem('users', JSON.stringify(users));
-                displayUsers(true);  // Re-render daftar user
+                displayUsers(true);  // Re-render daftar user setelah update
             }
         }
 
@@ -125,7 +125,7 @@
             if (confirmed) {
                 const updatedUsers = users.filter(user => user.id !== userId);
                 localStorage.setItem('users', JSON.stringify(updatedUsers));
-                displayUsers(true);  // Re-render daftar user
+                displayUsers(true);  // Re-render daftar user setelah hapus
             }
         }
     </script>
