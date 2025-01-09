@@ -41,18 +41,24 @@
                 <div class="invalid-feedback">Nama produk tidak boleh kosong.</div>
             </div>
             <div class="mb-3">
-                <label for="kategori" class="form-label">Kategori</label>
-                <input type="text" class="form-control" id="kategori" placeholder="Masukkan Kategori" required>
+                <label for="kategoriId" class="form-label">Kategori</label>
+                <select id="kategoriId" class="form-select" required>
+                    <option value="">Pilih Kategori</option>
+                </select>
                 <div class="invalid-feedback">Kategori tidak boleh kosong.</div>
             </div>
             <div class="mb-3">
-                <label for="suplayer" class="form-label">Suplayer</label>
-                <input type="text" class="form-control" id="suplayer" placeholder="Masukkan Suplayer" required>
+                <label for="suplayerId" class="form-label">Suplayer</label>
+                <select id="suplayerId" class="form-select" required>
+                    <option value="">Pilih Suplayer</option>
+                </select>
                 <div class="invalid-feedback">Suplayer tidak boleh kosong.</div>
             </div>
             <div class="mb-3">
-                <label for="item" class="form-label">Item</label>
-                <input type="text" class="form-control" id="item" placeholder="Masukkan Item" required>
+                <label for="itemId" class="form-label">Item</label>
+                <select id="itemId" class="form-select" required>
+                    <option value="">Pilih Item</option>
+                </select>
                 <div class="invalid-feedback">Item tidak boleh kosong.</div>
             </div>
             <div class="mb-3">
@@ -91,6 +97,9 @@
 
     <script>
         let produk = JSON.parse(localStorage.getItem('produk')) || [];
+        let kategori = JSON.parse(localStorage.getItem('kategori')) || [];
+        let suplayer = JSON.parse(localStorage.getItem('suplayer')) || [];
+        let item = JSON.parse(localStorage.getItem('item')) || [];
         let editIndex = null; // Indeks data yang sedang diedit
 
         // Fungsi menyimpan ke localStorage
@@ -98,7 +107,7 @@
             localStorage.setItem('produk', JSON.stringify(produk));
         }
 
-        // Fungsi menampilkan tabel
+        // Fungsi menampilkan tabel produk
         function renderTable() {
             const tableBody = document.getElementById('produkTable');
             tableBody.innerHTML = '';
@@ -120,7 +129,40 @@
             });
         }
 
-        // Fungsi membuat ID unik
+        // Fungsi untuk mengisi select options Kategori
+        function loadKategoriOptions() {
+            const kategoriSelect = document.getElementById('kategoriId');
+            kategori.forEach(data => {
+                const option = document.createElement('option');
+                option.value = data.id;
+                option.textContent = data.name;
+                kategoriSelect.appendChild(option);
+            });
+        }
+
+        // Fungsi untuk mengisi select options Suplayer
+        function loadSuplayerOptions() {
+            const suplayerSelect = document.getElementById('suplayerId');
+            suplayer.forEach(data => {
+                const option = document.createElement('option');
+                option.value = data.id;
+                option.textContent = data.name;
+                suplayerSelect.appendChild(option);
+            });
+        }
+
+        // Fungsi untuk mengisi select options Item
+        function loadItemOptions() {
+            const itemSelect = document.getElementById('itemId');
+            item.forEach(data => {
+                const option = document.createElement('option');
+                option.value = data.id;
+                option.textContent = data.name;
+                itemSelect.appendChild(option);
+            });
+        }
+
+        // Fungsi untuk membuat ID unik
         function generateUniqueId() {
             let id = 'PROD-' + Math.floor(Math.random() * 10000);
             while (produk.some(data => data.id === id)) {
@@ -152,9 +194,9 @@
             const produkData = {
                 id: document.getElementById('produkId').value,
                 name: document.getElementById('produkName').value,
-                kategori: document.getElementById('kategori').value,
-                suplayer: document.getElementById('suplayer').value,
-                item: document.getElementById('item').value,
+                kategori: document.getElementById('kategoriId').value,
+                suplayer: document.getElementById('suplayerId').value,
+                item: document.getElementById('itemId').value,
                 stok: parseInt(document.getElementById('stok').value, 10),
                 harga: parseFloat(document.getElementById('harga').value),
             };
@@ -182,9 +224,9 @@
             editIndex = index;
             document.getElementById('produkId').value = data.id;
             document.getElementById('produkName').value = data.name;
-            document.getElementById('kategori').value = data.kategori;
-            document.getElementById('suplayer').value = data.suplayer;
-            document.getElementById('item').value = data.item;
+            document.getElementById('kategoriId').value = data.kategori;
+            document.getElementById('suplayerId').value = data.suplayer;
+            document.getElementById('itemId').value = data.item;
             document.getElementById('stok').value = data.stok;
             document.getElementById('harga').value = data.harga;
 
@@ -200,9 +242,12 @@
             }
         }
 
-        // Atur ID unik saat halaman dimuat
+        // Atur ID unik saat halaman dimuat dan muat opsi data
         window.onload = () => {
             setUniqueId();
+            loadKategoriOptions();
+            loadSuplayerOptions();
+            loadItemOptions();
             renderTable();
         };
     </script>
